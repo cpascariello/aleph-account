@@ -6,7 +6,7 @@ const routes = [
     children: [
       {
         name: 'dashboard',
-        path: '',
+        path: 'dashboard',
         component: () => import('pages/Index.vue')
       },
       // {
@@ -16,13 +16,24 @@ const routes = [
       // },
       {
         name: 'stake',
-        path: 'nodes',
+        path: '',
         component: () => import('pages/Stake.vue')
       },
       {
         name: 'ipfs',
         path: 'ipfs',
         component: () => import('pages/IPFSPin.vue')
+      },
+      {
+        name: 'nft-storage',
+        path: 'nfts',
+        component: () => import('pages/NFTStorage.vue')
+      },
+      {
+        name: 'nft-view',
+        path: 'nfts/:hash',
+        component: () => import('pages/NFTView.vue'),
+        props: true
       }
     ]
   },

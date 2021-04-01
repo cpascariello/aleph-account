@@ -175,7 +175,6 @@ export default {
           nodes.push(this.user_node)
         }
       }
-      console.log(nodes)
       return nodes
     },
     active_nodes: (state) => state.nodes.filter((node) => node.status === 'active').length,
@@ -316,6 +315,9 @@ export default {
     await this.prepare_nodes_feed()
   },
   async unmounted () {
+    this.statusSocket.close()
+  },
+  async destroyed () {
     this.statusSocket.close()
   },
   watch: {

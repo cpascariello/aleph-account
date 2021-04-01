@@ -25,8 +25,8 @@ export default new Vuex.Store({
     erc20_address: '0x27702a26126e0B3702af63Ee09aC4d1A084EF628',
     monitor_address: '0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10',
     sender_address: '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25',
-    api_server: 'https://api2.aleph.im',
-    ws_api_server: 'wss://api2.aleph.im',
+    api_server: 'https://api1.aleph.im',
+    ws_api_server: 'wss://api1.aleph.im',
     ipfs_gateway: 'https://ipfs.io/ipfs/',
     account: null,
     profiles: {},
@@ -34,11 +34,13 @@ export default new Vuex.Store({
     categories: [ // categories are hard-coded for now...
     ],
     pages: {},
+    store_info: {},
     menu: [],
     notes: [],
     notebooks: {},
     files: [],
     nodes: [],
+    stored: [],
     mb_per_aleph: 3,
     balance_info: {
       ALEPH: 0
@@ -62,6 +64,9 @@ export default new Vuex.Store({
     set_pages (state, pages) { // TODO: handle per-page mutation
       state.pages = pages
     },
+    set_store_info (state, store_info) { // TODO: handle per-page mutation
+      state.store_info = store_info
+    },
     set_files (state, files) { // TODO: handle per-files mutation
       state.files = files
     },
@@ -73,6 +78,9 @@ export default new Vuex.Store({
     },
     set_nodes (state, nodes) {
       state.nodes = nodes
+    },
+    set_stored (state, stored) {
+      state.stored = stored
     },
     update_note (state, new_note) {
       for (const note of state.notes) {
@@ -252,6 +260,15 @@ export default new Vuex.Store({
       }
       commit('set_notebooks', notebooks)
     },
+    async update_store_info ({ state, commit }) {
+      let metadata = await aggregates.fetch_one(
+        state.account.address,
+        'stores', {
+          api_server: state.api_server
+        })
+      if (metadata === null) { metadata = {} }
+      commit('set_store_info', metadata)
+    },
     async update_nodes ({ state, commit }) {
       let corechannel = await aggregates.fetch_one(
         state.monitor_address,
@@ -269,11 +286,12 @@ export default new Vuex.Store({
           {
             message_type: 'STORE',
             addresses: [state.account.address],
-            pagination: 100,
-            api_server: state.api_server
+            pagination: 1000,
+            api_server: state.api_server,
+            channel: 'PINNING'
           })
 
-        if (items.messages) { commit('set_stored', messages) }
+        if (items.messages) { commit('set_stored', items.messages) }
       }
     }
     // async update_pages({ state, commit }) {

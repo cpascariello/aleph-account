@@ -17,8 +17,8 @@
           <q-btn v-if="!account" size="md" class="bg-aleph-radial text-white" @click="web3Connect">Connect to a wallet</q-btn>
           <q-btn v-if="account" class="text-white">
             {{balance_info['ALEPH'].toFixed(2)}}
-            &nbsp;/ {{owed_rewards.toFixed(2)}} <img src="~/assets/logo-white.svg" style="height: 1.4em; margin: 0 0 .2em .4em;"/>
-            <q-tooltip>
+            <span v-if="owed_rewards">&nbsp;/ {{owed_rewards.toFixed(2)}}</span> <img src="~/assets/logo-white.svg" style="height: 1.4em; margin: 0 0 .2em .4em;"/>
+            <q-tooltip v-if="owed_rewards">
               <strong>Amount staked / pending rewards</strong><br />
               Rewards are sent every few days when gas is low.
             </q-tooltip>
@@ -31,7 +31,7 @@
     <q-drawer show-if-above v-model="left" side="left" content-class="column justify-between q-pa-md" :width="250">
       <!-- drawer content -->
       <div>
-        <p class="q-pa-md">
+        <p class="q-px-md q-pb-md">
           <img v-if="!$q.dark.isActive" src="~/assets/logo-blue.svg" height="32">
           <img v-else src="~/assets/logo-white.svg" height="32">
 
@@ -67,8 +67,8 @@
           <q-separator />
           <q-item class="q-mt-sm">
             <q-item-section>
-              <q-item-label caption>0 GB of {{(allowance/1000).toFixed(3)}} GB</q-item-label>
-              <q-linear-progress :value="storage" class="q-my-sm" rounded />
+              <q-item-label caption>{{(total_used/1024).toFixed(3)}} GB of {{(allowance/1024).toFixed(3)}} GB</q-item-label>
+              <q-linear-progress :value="total_used / allowance" class="q-my-sm" rounded />
             </q-item-section>
           </q-item>
         </q-list>
@@ -121,6 +121,13 @@ export default {
         }
       }
       return 0
+    },
+    total_used (state) {
+      let value = 0
+      for (let item of state.stored) {
+        value = value + item.content.size
+      }
+      return value / (1024 ** 2)
     }
   }),
   watch: {
@@ -147,14 +154,15 @@ export default {
         {
           title: 'Earn',
           items: [
-            { text: 'Dashboard', link: { name: 'dashboard' }, exact: true },
+            // { text: 'Dashboard', link: { name: 'dashboard' }, exact: true },
             { text: 'Nodes and Staking', link: { name: 'stake' }, exact: true }
           ]
         },
         {
           title: 'Store',
           items: [
-            { text: 'IPFS Pinning', link: { name: 'ipfs' }, exact: true }
+            { text: 'IPFS Pinning', link: { name: 'ipfs' }, exact: true },
+            { text: 'NFT Storage', link: { name: 'nft-storage' }, exact: true }
           ]
         }
 
@@ -297,6 +305,20 @@ export default {
   }
 }
 
+.q-list.menu {
+  .q-item {
+      min-height: 36px;
+      padding-bottom: 0;
+      padding-top: 0;
+  }
+
+  .q-item__label--header {
+    font-weight: 700;
+    padding-bottom: 0.5em;
+    padding-top: 1.5em;
+  }
+}
+
 .q-drawer--dark {
   background: #172025;
 
@@ -313,9 +335,6 @@ export default {
 
     .q-item__label--header {
       color: #FFF;
-      font-weight: 700;
-      padding-bottom: 0.5em;
-      padding-top: 1.5em;
     }
   }
 }
